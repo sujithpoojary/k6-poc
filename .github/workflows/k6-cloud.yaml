@@ -37,6 +37,7 @@ jobs:
       - name: Run k6 Cloud smoke test
         env:
           K6_CLOUD_TOKEN: ${{ secrets.K6_CLOUD_TOKEN }}
+          K6_CLOUD_STACK_ID: 1709705
         run: |
           k6 cloud run \
             --env BASE_URL=${{ vars.BASE_URL || 'https://postman-echo.com' }} \
