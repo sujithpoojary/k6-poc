@@ -1,0 +1,45 @@
+name: k6 Cloud Performance Test
+
+on:
+  # Run on every push to main
+  push:
+    branches: [main]
+  # Run on pull requests
+  pull_request:
+    branches: [main]
+  # Run on a schedule (every day at 9am UTC)
+  #schedule:
+  #  - cron: '0 9 * * *'
+  # Allow manual trigger from GitHub Actions UI
+  workflow_dispatch:
+
+jobs:
+  k6-cloud-run:
+    name: Run k6 Cloud Smoke Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install k6
+        run: |
+          sudo gpg -k
+          sudo gpg --no-default-keyring \
+            --keyring /usr/share/keyrings/k6-archive-keyring.gpg \
+            --keyserver hkp://keyserver.ubuntu.com:80 \
+            --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+          echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" \
+            | sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt-get update
+          sudo apt-get install k6
+
+      - name: Run k6 Cloud smoke test
+        env:
+          K6_CLOUD_TOKEN: ${{ secrets.K6_CLOUD_TOKEN }}
+        run: |
+          k6 cloud run \
+            --env BASE_URL=${{ vars.BASE_URL || 'https://postman-echo.com' }} \
+            --env BRANCH=${{ github.ref_name }} \
+            --env GITHUB_RUN_NUMBER=${{ github.run_number }} \
+            tests/ci-smoke-test.js
