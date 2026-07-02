@@ -1,0 +1,11 @@
+# k6 output files
+results/
+screenshots/
+*.json.out
+*.csv.out
+
+# macOS
+.DS_Store
+
+# Node (if using bundlers)
+node_modules/
